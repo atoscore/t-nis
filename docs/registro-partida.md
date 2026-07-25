@@ -16,6 +16,15 @@ via cliente Supabase contra o schema existente):
   `src/pages/NewMatch.tsx` (configuração da partida) e
   `src/pages/LiveMatch.tsx` (registro em tempo real; ao encerrar, renderiza
   `src/components/MatchReport.tsx`, mantido por outro módulo).
+- Autenticação (Supabase Auth, email/senha): `src/pages/Login.tsx` e
+  `src/pages/SignUp.tsx` (cadastro próprio; senha mínima de 6 caracteres).
+  `App.tsx` restaura a sessão com `auth.getSession()`, reage a
+  `auth.onAuthStateChange` e só renderiza NewMatch/LiveMatch com sessão
+  válida; o cabeçalho persistente traz o email logado e o botão "Sair"
+  (`auth.signOut()`). Se o projeto exigir confirmação de email, o signup
+  mostra "verifique seu email" (a resposta vem sem sessão); caso contrário
+  entra direto. Nenhuma policy de RLS foi alterada — o isolamento por
+  `owner_id = auth.uid()` continua como está, sem tabela de perfil.
 
 ## API
 
