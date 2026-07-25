@@ -18,6 +18,26 @@ const STROKE_LABELS: Record<Stroke, string> = {
   smash: 'Smash',
 };
 
+/*
+ * Outcomes válidos por golpe: ace/dupla_falta só existem no saque;
+ * winner/erro_* só existem na troca de bola após o saque. A view
+ * match_stats_summary não quebra winner/erro_* por stroke = 'saque', então
+ * essa combinação sumiria da quebra por golpe se fosse lançada.
+ */
+const SERVE_OUTCOMES: readonly Outcome[] = [
+  'ace',
+  'dupla_falta',
+  'ponto_ganho',
+  'ponto_perdido',
+];
+const RALLY_OUTCOMES: readonly Outcome[] = [
+  'winner',
+  'erro_nao_forcado',
+  'erro_forcado',
+  'ponto_ganho',
+  'ponto_perdido',
+];
+
 const OUTCOME_LABELS: Record<Outcome, string> = {
   ace: 'Ace',
   dupla_falta: 'Dupla falta',
@@ -184,7 +204,11 @@ export default function LiveMatch({ matchId, onExit }: LiveMatchProps) {
           <div className="entry-group">
             <h2>Resultado (lança o ponto)</h2>
             <div className="option-row wrap">
-              {(Object.keys(OUTCOME_LABELS) as Outcome[]).map((option) => (
+              {(Object.keys(OUTCOME_LABELS) as Outcome[])
+                .filter((option) =>
+                  (stroke === 'saque' ? SERVE_OUTCOMES : RALLY_OUTCOMES).includes(option)
+                )
+                .map((option) => (
                 <button
                   key={option}
                   type="button"
