@@ -125,6 +125,76 @@ export type PlayerInsert = {
 
 export type PlayerUpdate = Partial<PlayerInsert>;
 
+export type PlayerEditorStatus = 'active' | 'revoked';
+
+export type PlayerEditorRow = {
+  id: string;
+  player_id: string;
+  editor_id: string;
+  status: PlayerEditorStatus;
+  granted_by: string;
+  created_at: string;
+}
+
+export type PlayerEditorInsert = {
+  id?: string;
+  player_id: string;
+  editor_id: string;
+  status: PlayerEditorStatus;
+  granted_by: string;
+  created_at?: string;
+}
+
+export type PlayerEditorUpdate = Partial<PlayerEditorInsert>;
+
+export type CommunityRow = {
+  id: string;
+  name: string;
+  created_by: string;
+  created_at: string;
+}
+
+export type CommunityInsert = {
+  id?: string;
+  name: string;
+  created_by: string;
+  created_at?: string;
+}
+
+export type CommunityUpdate = Partial<CommunityInsert>;
+
+export type MemberStatus = 'pending' | 'accepted' | 'rejected';
+
+export type CommunityMemberRow = {
+  id: string;
+  community_id: string;
+  user_id: string;
+  status: MemberStatus;
+  invited_by: string | null;
+  created_at: string;
+}
+
+export type CommunityMemberInsert = {
+  id?: string;
+  community_id: string;
+  user_id: string;
+  status: MemberStatus;
+  invited_by?: string | null;
+  created_at?: string;
+}
+
+export type CommunityMemberUpdate = Partial<CommunityMemberInsert>;
+
+/* Linha retornada pela RPC get_community_ranking. */
+export type CommunityRankingRow = {
+  account_id: string;
+  display_name: string;
+  vitorias: number;
+  derrotas: number;
+  partidas: number;
+  pct_vitorias: number | null;
+}
+
 export type MatchStatsSummaryRow = {
   match_id: string;
   aces: number;
@@ -183,6 +253,24 @@ export type Database = {
         Update: PlayerUpdate;
         Relationships: [];
       };
+      player_editors: {
+        Row: PlayerEditorRow;
+        Insert: PlayerEditorInsert;
+        Update: PlayerEditorUpdate;
+        Relationships: [];
+      };
+      communities: {
+        Row: CommunityRow;
+        Insert: CommunityInsert;
+        Update: CommunityUpdate;
+        Relationships: [];
+      };
+      community_members: {
+        Row: CommunityMemberRow;
+        Insert: CommunityMemberInsert;
+        Update: CommunityMemberUpdate;
+        Relationships: [];
+      };
     };
     Views: {
       match_stats_summary: {
@@ -190,7 +278,12 @@ export type Database = {
         Relationships: [];
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      get_community_ranking: {
+        Args: { p_community_id: string };
+        Returns: CommunityRankingRow[];
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

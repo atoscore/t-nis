@@ -16,6 +16,13 @@ via cliente Supabase contra o schema existente):
   `src/pages/NewMatch.tsx` (configuração da partida) e
   `src/pages/LiveMatch.tsx` (registro em tempo real; ao encerrar, renderiza
   `src/components/MatchReport.tsx`, mantido por outro módulo).
+- Comunidades: `src/services/communityService.ts` +
+  `src/pages/CommunityList|NewCommunity|JoinCommunity|CommunityDetail|InviteToCommunity.tsx`.
+  Convite do criador entra direto como `accepted` (não há aceite pelo
+  convidado — UPDATE é só do criador); pedido espontâneo entra `pending` até o
+  criador responder. Ranking via RPC `get_community_ranking` (erro `P0001` é
+  tratado como "precisa ser membro"). O convite pede o UUID da conta colado
+  manualmente — bloqueio conhecido: não existe busca de usuário por nome/email.
 - Autenticação (Supabase Auth, email/senha): `src/pages/Login.tsx` e
   `src/pages/SignUp.tsx` (cadastro próprio; senha mínima de 6 caracteres).
   `App.tsx` restaura a sessão com `auth.getSession()`, reage a
