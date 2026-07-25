@@ -23,7 +23,7 @@ export async function createPlayer(name: string): Promise<PlayerRow> {
 
   const { data, error } = await supabase
     .from('players')
-    .insert({ owner_id: auth.user.id, name: trimmed })
+    .insert({ owner_id: auth.user.id, user_id: auth.user.id, name: trimmed })
     .select()
     .single();
   if (error) {

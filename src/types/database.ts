@@ -111,12 +111,15 @@ export type StatEventUpdate = Partial<StatEventInsert>;
 export type PlayerRow = {
   id: string;
   owner_id: string;
+  /* Igual a owner_id quando o jogador é o próprio usuário autenticado. */
+  user_id: string | null;
   name: string;
 }
 
 export type PlayerInsert = {
   id?: string;
   owner_id: string;
+  user_id?: string | null;
   name: string;
 }
 
