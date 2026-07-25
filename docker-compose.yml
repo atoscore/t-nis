@@ -1,0 +1,15 @@
+services:
+  app-tenis-web:
+    build:
+      context: .
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    container_name: app-tenis-web
+    restart: unless-stopped
+    networks:
+      - npm_network
+
+networks:
+  npm_network:
+    external: true
