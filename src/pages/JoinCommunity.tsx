@@ -3,8 +3,9 @@ import {
   getMyMembership,
   requestToJoin,
   searchCommunities,
+  type CommunityRow,
 } from '../services/communityService';
-import type { CommunityRow, MemberStatus } from '../types/database';
+import type { MemberStatus } from '../types/domain';
 
 interface JoinCommunityProps {
   onBack: () => void;
@@ -34,7 +35,11 @@ export default function JoinCommunity({ onBack }: JoinCommunityProps) {
       );
       const byCommunity: Record<string, MemberStatus | undefined> = {};
       found.forEach((community, index) => {
-        byCommunity[community.id] = memberships[index]?.status;
+        // community_members.status é texto livre no banco; MemberStatus é o
+        // conjunto de valores que a aplicação de fato grava (ver types/domain).
+        byCommunity[community.id] = memberships[index]?.status as
+          | MemberStatus
+          | undefined;
       });
       setResults(found);
       setMembershipByCommunity(byCommunity);

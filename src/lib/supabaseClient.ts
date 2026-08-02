@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../types/database';
+import type { Database } from '../types/supabase';
 
 /*
  * Aceita tanto o ambiente do Vite (variáveis VITE_*, expostas ao browser)

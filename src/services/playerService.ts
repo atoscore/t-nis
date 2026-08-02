@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
-import type { PlayerRow } from '../types/database';
+import type { Tables } from '../types/supabase';
+
+export type PlayerRow = Tables<'players'>;
 
 export async function listPlayers(): Promise<PlayerRow[]> {
   const { data, error } = await supabase

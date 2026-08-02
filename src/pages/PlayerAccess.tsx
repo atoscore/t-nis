@@ -3,11 +3,9 @@ import {
   grantEditorAccess,
   listMyPlayerGrants,
   revokeAccess,
+  type PlayerEditorRow,
 } from '../services/playerEditorService';
-import type {
-  PlayerEditorRow,
-  PlayerEditorStatus,
-} from '../types/database';
+import type { PlayerEditorStatus } from '../types/domain';
 
 export default function PlayerAccess({ playerId }: { playerId: string }) {
   const [grants, setGrants] = useState<PlayerEditorRow[]>([]);
@@ -148,7 +146,7 @@ export default function PlayerAccess({ playerId }: { playerId: string }) {
                   <span
                     className={`access-status access-status-${grant.status}`}
                   >
-                    {statusLabel(grant.status)}
+                    {statusLabel(grant.status as PlayerEditorStatus)}
                   </span>
                   <span className="access-date">
                     Concedido em {formatDate(grant.created_at)}

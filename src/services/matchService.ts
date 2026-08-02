@@ -12,15 +12,13 @@
  */
 
 import { supabase } from '../lib/supabaseClient';
-import type {
-  MatchRow,
-  Outcome,
-  SetRow,
-  SetUpdate,
-  Side,
-  StatEventRow,
-  Stroke,
-} from '../types/database';
+import type { Tables, TablesUpdate } from '../types/supabase';
+import type { MatchStatus, Outcome, Side, Stroke } from '../types/domain';
+
+type MatchRow = Tables<'matches'>;
+type SetRow = Tables<'sets'>;
+type SetUpdate = TablesUpdate<'sets'>;
+type StatEventRow = Tables<'stat_events'>;
 import {
   computePointWinner,
   computeSetWinner,
@@ -69,7 +67,7 @@ export interface SetScore {
 
 export interface MatchState {
   matchId: string;
-  status: MatchRow['status'];
+  status: MatchStatus;
   bestOf: number;
   opponentName: string;
   /* Regras efetivas lidas de matches (null nas colunas vale como padrão). */
@@ -285,7 +283,9 @@ export async function getMatchState(matchId: string): Promise<MatchState> {
           }
         : null,
     isMatchTiebreak: isMatchTiebreakSet(match, set.set_number),
-    winner: set.winner,
+    // sets.winner é texto livre no banco; só a aplicação garante que os
+    // valores gravados são 'player'/'opponent' (ver types/domain.Side).
+    winner: set.winner as Side | null,
   }));
 
   const setsWon = {
@@ -295,9 +295,11 @@ export async function getMatchState(matchId: string): Promise<MatchState> {
 
   const base: MatchState = {
     matchId: match.id,
-    status: match.status,
+    // matches.status é texto livre no banco; MatchStatus é o conjunto de
+    // valores que a aplicação de fato grava (ver types/domain).
+    status: match.status as MatchStatus,
     bestOf: match.best_of,
-    opponentName: match.opponent_name,
+    opponentName: match.opponent_name ?? '',
     rules: {
       noAd: match.no_ad === true,
       finalSetMatchTiebreak: match.final_set_match_tiebreak === true,
@@ -321,7 +323,9 @@ export async function getMatchState(matchId: string): Promise<MatchState> {
   const gameNumber = currentSet.player_games + currentSet.opponent_games + 1;
   const events = await fetchGameEvents(matchId, currentSet.set_number, gameNumber);
   const game = scoreGame(
-    events.map((event) => computePointWinner(event.server, event.outcome)),
+    events.map((event) =>
+      computePointWinner(event.server as Side, event.outcome as Outcome)
+    ),
     mode
   );
 
@@ -402,7 +406,7 @@ async function loadTurnContext(matchId: string): Promise<TurnContext> {
 
   const events = await fetchGameEvents(matchId, currentSet.set_number, gameNumber);
   const priorWinners = events.map((event) =>
-    computePointWinner(event.server, event.outcome)
+    computePointWinner(event.server as Side, event.outcome as Outcome)
   );
 
   return {

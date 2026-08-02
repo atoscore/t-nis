@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
-import type { MatchStatsSummaryRow } from '../types/database';
+import type { Tables } from '../types/supabase';
+
+export type MatchStatsSummaryRow = Tables<'match_stats_summary'>;
 
 /**
  * Carrega o resumo já agregado pelo banco para uma única partida.
