@@ -4,24 +4,16 @@
  * aprovação já usado em community_members (pending/accepted), sem inventar
  * um novo — a diferença é que aqui rejeitar remove a linha em vez de marcar
  * 'rejected' (a tabela follows nem aceita esse valor no status).
- *
- * Usa `db` (cliente com o tipo estendido de types/supabase-pending) em vez
- * do `supabase` de lib/supabaseClient enquanto a migration de follows/
- * profiles.is_private não é aplicada — ver o comentário em
- * types/supabase-pending.ts para o que fazer depois que ela for aplicada.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
-import type { Database } from '../types/supabase-pending';
+import type { Tables } from '../types/supabase';
 import { decideFollowStatus } from './followStatus';
-
-const db = supabase as unknown as SupabaseClient<Database>;
 
 const UNIQUE_VIOLATION = '23505';
 
 export type { FollowStatus } from './followStatus';
-export type FollowRow = Database['public']['Tables']['follows']['Row'];
+export type FollowRow = Tables<'follows'>;
 
 async function requireUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
@@ -32,7 +24,7 @@ async function requireUserId(): Promise<string> {
 }
 
 async function isPrivateProfile(userId: string): Promise<boolean> {
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from('profiles')
     .select('is_private')
     .eq('id', userId)
@@ -58,7 +50,7 @@ export async function followUser(followeeId: string): Promise<FollowRow> {
 
   const status = decideFollowStatus(await isPrivateProfile(followeeId));
 
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from('follows')
     .insert({ follower_id: followerId, followee_id: followeeId, status })
     .select()
@@ -75,7 +67,7 @@ export async function followUser(followeeId: string): Promise<FollowRow> {
 /* Pedidos pendentes recebidos — só faz sentido para o followee responder. */
 export async function listPendingFollowRequests(): Promise<FollowRow[]> {
   const userId = await requireUserId();
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from('follows')
     .select('*')
     .eq('followee_id', userId)
@@ -93,7 +85,7 @@ export async function respondToFollowRequest(
   accept: boolean
 ): Promise<void> {
   if (accept) {
-    const { error } = await db
+    const { error } = await supabase
       .from('follows')
       .update({ status: 'accepted' })
       .eq('id', followId);
@@ -103,7 +95,7 @@ export async function respondToFollowRequest(
     return;
   }
 
-  const { error } = await db.from('follows').delete().eq('id', followId);
+  const { error } = await supabase.from('follows').delete().eq('id', followId);
   if (error) {
     throw new Error(`Falha ao rejeitar o pedido: ${error.message}`);
   }
