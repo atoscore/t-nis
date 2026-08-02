@@ -34,6 +34,7 @@ import {
   type GameMode,
   type GameScore,
 } from './scoring';
+import { updateEloRatings } from './elo';
 
 const DEFAULT_MATCH_TIEBREAK_POINTS = 10;
 
@@ -148,13 +149,15 @@ export async function startMatch(
     );
   }
 
+  const now = new Date().toISOString();
   const { data: match, error: matchError } = await supabase
     .from('matches')
     .insert({
       owner_id: auth.user.id,
       player_id: playerId,
       opponent_name: opponentName.trim(),
-      match_date: new Date().toISOString(),
+      match_date: now,
+      started_at: now,
       location,
       best_of: bestOf,
       status: 'in_progress',
@@ -434,7 +437,7 @@ async function ensureOpenSet(match: MatchRow, sets: SetRow[]): Promise<SetRow> {
   const playerSets = sets.filter((set) => set.winner === 'player').length;
   const opponentSets = sets.filter((set) => set.winner === 'opponent').length;
   if (playerSets >= needed || opponentSets >= needed) {
-    await completeMatch(match.id);
+    await completeMatch(match, playerSets >= needed ? 'player' : 'opponent');
     throw new Error('A partida já foi decidida; não é possível registrar pontos.');
   }
 
@@ -512,7 +515,7 @@ async function applyGameCompletion(
     (setWinner === side ? 1 : 0);
 
   if (wonBy('player') >= needed || wonBy('opponent') >= needed) {
-    await completeMatch(match.id);
+    await completeMatch(match, wonBy('player') >= needed ? 'player' : 'opponent');
     return { setWinner, matchCompleted: true };
   }
 
@@ -586,13 +589,57 @@ async function updateSet(setId: string, update: SetUpdate): Promise<void> {
   }
 }
 
-async function completeMatch(matchId: string): Promise<void> {
+async function completeMatch(match: MatchRow, winner: Side): Promise<void> {
   const { error } = await supabase
     .from('matches')
-    .update({ status: 'completed' })
-    .eq('id', matchId);
+    .update({ status: 'completed', ended_at: new Date().toISOString() })
+    .eq('id', match.id);
   if (error) {
     throw new Error(`Falha ao encerrar a partida: ${error.message}`);
+  }
+
+  await applyEloUpdate(match, winner);
+}
+
+/*
+ * Sem opponent_player_id a partida conta normal pro histórico, mas não mexe
+ * em ELO (adversário sem cadastro vinculado não tem rating pra atualizar).
+ */
+async function applyEloUpdate(match: MatchRow, winner: Side): Promise<void> {
+  if (!match.opponent_player_id) return;
+
+  const [player, opponent] = await Promise.all([
+    fetchPlayerEloRating(match.player_id),
+    fetchPlayerEloRating(match.opponent_player_id),
+  ]);
+
+  const updated = updateEloRatings(player, opponent, winner);
+
+  await Promise.all([
+    updatePlayerEloRating(match.player_id, updated.player),
+    updatePlayerEloRating(match.opponent_player_id, updated.opponent),
+  ]);
+}
+
+async function fetchPlayerEloRating(playerId: string): Promise<number> {
+  const { data, error } = await supabase
+    .from('players')
+    .select('elo_rating')
+    .eq('id', playerId)
+    .single();
+  if (error) {
+    throw new Error(`Falha ao carregar o ELO do jogador: ${error.message}`);
+  }
+  return data.elo_rating;
+}
+
+async function updatePlayerEloRating(playerId: string, eloRating: number): Promise<void> {
+  const { error } = await supabase
+    .from('players')
+    .update({ elo_rating: eloRating })
+    .eq('id', playerId);
+  if (error) {
+    throw new Error(`Falha ao atualizar o ELO do jogador: ${error.message}`);
   }
 }
 

@@ -24,6 +24,8 @@ export type MatchRow = {
   owner_id: string;
   player_id: string;
   opponent_name: string;
+  /* Preenchido só quando o adversário está vinculado a um player cadastrado. */
+  opponent_player_id: string | null;
   match_date: string;
   location: string | null;
   best_of: number;
@@ -34,6 +36,9 @@ export type MatchRow = {
   final_set_match_tiebreak: boolean | null;
   /* Alvo de pontos do match tiebreak; null usa o padrão de 10. */
   match_tiebreak_points_to: number | null;
+  /* Preenchidos apenas pelo fluxo do marcador ao vivo. */
+  started_at: string | null;
+  ended_at: string | null;
 }
 
 export type MatchInsert = {
@@ -41,6 +46,7 @@ export type MatchInsert = {
   owner_id: string;
   player_id: string;
   opponent_name: string;
+  opponent_player_id?: string | null;
   match_date?: string;
   location?: string | null;
   best_of: number;
@@ -48,6 +54,8 @@ export type MatchInsert = {
   no_ad?: boolean | null;
   final_set_match_tiebreak?: boolean | null;
   match_tiebreak_points_to?: number | null;
+  started_at?: string | null;
+  ended_at?: string | null;
 }
 
 export type MatchUpdate = Partial<MatchInsert>;
@@ -114,6 +122,7 @@ export type PlayerRow = {
   /* Igual a owner_id quando o jogador é o próprio usuário autenticado. */
   user_id: string | null;
   name: string;
+  elo_rating: number;
 }
 
 export type PlayerInsert = {
@@ -121,6 +130,7 @@ export type PlayerInsert = {
   owner_id: string;
   user_id?: string | null;
   name: string;
+  elo_rating?: number;
 }
 
 export type PlayerUpdate = Partial<PlayerInsert>;
@@ -282,6 +292,10 @@ export type Database = {
       get_community_ranking: {
         Args: { p_community_id: string };
         Returns: CommunityRankingRow[];
+      };
+      classe_from_elo: {
+        Args: { elo: number };
+        Returns: string;
       };
     };
     Enums: Record<string, never>;
