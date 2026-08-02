@@ -5,7 +5,9 @@
  * regra em si.
  */
 
-export type FollowStatus = 'pending' | 'accepted';
+import type { FollowStatus } from '../types/domain';
+
+export type { FollowStatus };
 
 /* Público entra direto como 'accepted'; privado fica 'pending' até o followee responder. */
 export function decideFollowStatus(isPrivate: boolean): FollowStatus {

@@ -7,12 +7,8 @@
  * autor (self + accepted followees), não só confia na RLS.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
-import type { Database } from '../types/supabase-pending';
 import type { PostRow } from './postService';
-
-const db = supabase as unknown as SupabaseClient<Database>;
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -22,7 +18,7 @@ export interface FeedPage {
 }
 
 async function acceptedFolloweeIds(viewerId: string): Promise<string[]> {
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from('follows')
     .select('followee_id')
     .eq('follower_id', viewerId)
@@ -46,7 +42,7 @@ export async function getFeed(
   const followeeIds = await acceptedFolloweeIds(viewerId);
   const authorIds = [viewerId, ...followeeIds];
 
-  let query = db
+  let query = supabase
     .from('posts')
     .select('*')
     .in('author_id', authorIds)

@@ -92,6 +92,30 @@ export type Database = {
           },
         ]
       }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+          id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+          id?: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+          id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           best_of: number
@@ -223,21 +247,112 @@ export type Database = {
         }
         Relationships: []
       }
+      post_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          image_path: string | null
+          link_preview: Json | null
+          link_url: string | null
+          text_content: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          link_preview?: Json | null
+          link_url?: string | null
+          text_content: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          link_preview?: Json | null
+          link_url?: string | null
+          text_content?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           display_name: string
           id: string
+          is_private: boolean
         }
         Insert: {
           created_at?: string
           display_name: string
           id: string
+          is_private?: boolean
         }
         Update: {
           created_at?: string
           display_name?: string
           id?: string
+          is_private?: boolean
         }
         Relationships: []
       }
@@ -384,6 +499,10 @@ export type Database = {
     }
     Functions: {
       classe_from_elo: { Args: { elo: number }; Returns: string }
+      follow_status_allowed: {
+        Args: { p_followee_id: string; p_status: string }
+        Returns: boolean
+      }
       get_community_ranking: {
         Args: { p_community_id: string }
         Returns: {
@@ -418,6 +537,10 @@ export type Database = {
       }
       is_player_owner: {
         Args: { p_player_id: string; p_uid: string }
+        Returns: boolean
+      }
+      post_visible_to: {
+        Args: { p_author_id: string; p_viewer_id: string }
         Returns: boolean
       }
     }

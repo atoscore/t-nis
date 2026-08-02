@@ -1,10 +1,11 @@
 /*
  * Literais de domínio que o banco não expõe como tipo: as colunas
  * correspondentes (matches.status, sets.winner, stat_events.server/outcome,
- * community_members.status, player_editors.status) são texto livre no schema
- * real, então `supabase gen types` as gera como `string`. Estes tipos captam
- * o conjunto de valores que a aplicação de fato grava/espera — não são
- * gerados e não têm outra fonte de verdade além deste arquivo.
+ * community_members.status, player_editors.status, follows.status) são texto
+ * livre no schema real, então `supabase gen types` as gera como `string`.
+ * Estes tipos captam o conjunto de valores que a aplicação de fato
+ * grava/espera — não são gerados e não têm outra fonte de verdade além
+ * deste arquivo.
  */
 
 export type Side = 'player' | 'opponent';
@@ -25,3 +26,5 @@ export type Outcome =
 export type MemberStatus = 'pending' | 'accepted' | 'rejected';
 
 export type PlayerEditorStatus = 'active' | 'revoked';
+
+export type FollowStatus = 'pending' | 'accepted';

@@ -4,23 +4,16 @@
  * supabase/migrations/20260802000004_add_posts_feed.sql); aqui só ficam as
  * regras que o banco não expressa sozinho: resolver o preview do link antes
  * de gravar (cache) e alternar curtir/descurtir.
- *
- * Usa `db` (tipo estendido de types/supabase-pending) enquanto a migration
- * de posts/post_likes/post_comments não é refletida em types/supabase.ts —
- * mesmo motivo do followService, ver o comentário em supabase-pending.ts.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
-import type { Database } from '../types/supabase-pending';
+import type { Json, Tables } from '../types/supabase';
 import { getLinkPreview, type LinkPreview } from './linkPreviewService';
-
-const db = supabase as unknown as SupabaseClient<Database>;
 
 const POST_IMAGES_BUCKET = 'post-images';
 
-export type PostRow = Database['public']['Tables']['posts']['Row'];
-export type PostCommentRow = Database['public']['Tables']['post_comments']['Row'];
+export type PostRow = Tables<'posts'>;
+export type PostCommentRow = Tables<'post_comments'>;
 
 async function requireUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
@@ -47,14 +40,16 @@ export async function createPost(input: CreatePostInput): Promise<PostRow> {
     ? await getLinkPreview(input.linkUrl)
     : null;
 
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from('posts')
     .insert({
       author_id: authorId,
       text_content: input.textContent,
       image_path: input.imagePath ?? null,
       link_url: input.linkUrl ?? null,
-      link_preview: linkPreview,
+      /* LinkPreview é estruturalmente JSON, mas não tem index signature — TS
+       * não aceita a interface direto onde o gerado espera Json. */
+      link_preview: linkPreview as Json | null,
     })
     .select()
     .single();
@@ -68,7 +63,7 @@ export async function createPost(input: CreatePostInput): Promise<PostRow> {
 export async function toggleLike(postId: string): Promise<boolean> {
   const userId = await requireUserId();
 
-  const { data: existing, error: selectError } = await db
+  const { data: existing, error: selectError } = await supabase
     .from('post_likes')
     .select('post_id')
     .eq('post_id', postId)
@@ -79,7 +74,7 @@ export async function toggleLike(postId: string): Promise<boolean> {
   }
 
   if (existing) {
-    const { error } = await db
+    const { error } = await supabase
       .from('post_likes')
       .delete()
       .eq('post_id', postId)
@@ -90,7 +85,7 @@ export async function toggleLike(postId: string): Promise<boolean> {
     return false;
   }
 
-  const { error } = await db.from('post_likes').insert({ post_id: postId, user_id: userId });
+  const { error } = await supabase.from('post_likes').insert({ post_id: postId, user_id: userId });
   if (error) {
     throw new Error(`Falha ao curtir: ${error.message}`);
   }
@@ -99,7 +94,7 @@ export async function toggleLike(postId: string): Promise<boolean> {
 
 export async function addComment(postId: string, content: string): Promise<PostCommentRow> {
   const authorId = await requireUserId();
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from('post_comments')
     .insert({ post_id: postId, author_id: authorId, content })
     .select()
@@ -115,7 +110,7 @@ export async function addComment(postId: string, content: string): Promise<PostC
  * "não é seu" (mesma discrição já usada em respondToJoinRequest).
  */
 export async function deletePost(postId: string): Promise<void> {
-  const { data, error } = await db.from('posts').delete().eq('id', postId).select().maybeSingle();
+  const { data, error } = await supabase.from('posts').delete().eq('id', postId).select().maybeSingle();
   if (error) {
     throw new Error(`Falha ao excluir o post: ${error.message}`);
   }
