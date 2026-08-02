@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { startMatch } from '../services/matchService';
-import { createPlayer, listPlayers } from '../services/playerService';
-import type { PlayerRow } from '../types/database';
+import { createPlayer, listPlayers, type PlayerRow } from '../services/playerService';
 
 const NEW_PLAYER = '__new__';
 

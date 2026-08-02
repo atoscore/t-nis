@@ -9,11 +9,14 @@
  */
 
 import { supabase } from '../lib/supabaseClient';
-import type {
-  CommunityMemberRow,
-  CommunityRankingRow,
-  CommunityRow,
-} from '../types/database';
+import type { Database, Tables } from '../types/supabase';
+
+export type CommunityRow = Tables<'communities'>;
+export type CommunityMemberRow = Tables<'community_members'>;
+/* Linha retornada pela RPC get_community_ranking (não é uma tabela, então
+ * não existe alias direto via Tables<>). */
+export type CommunityRankingRow =
+  Database['public']['Functions']['get_community_ranking']['Returns'][number];
 
 /* Códigos Postgres: violação de chave única / FK / RAISE EXCEPTION. */
 const UNIQUE_VIOLATION = '23505';

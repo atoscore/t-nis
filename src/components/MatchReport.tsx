@@ -1,11 +1,10 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { getMatchStats } from '../services/statsService';
-import type {
-  MatchRow,
-  MatchStatsSummaryRow,
-  SetRow,
-} from '../types/database';
+import { getMatchStats, type MatchStatsSummaryRow } from '../services/statsService';
+import type { Tables } from '../types/supabase';
+
+type MatchRow = Tables<'matches'>;
+type SetRow = Tables<'sets'>;
 
 type MatchContext = Pick<MatchRow, 'opponent_name' | 'match_date'>;
 
@@ -114,8 +113,8 @@ export default function MatchReport({ matchId }: { matchId: string }) {
 
       <Section title="Saque">
         <StatGrid>
-          <Stat label="Aces" value={stats.aces} />
-          <Stat label="Duplas faltas" value={stats.duplas_faltas} />
+          <Stat label="Aces" value={stats.aces ?? 0} />
+          <Stat label="Duplas faltas" value={stats.duplas_faltas ?? 0} />
           <Stat
             label="% de primeiro saque"
             value={formatPercentOrUnavailable(stats.pct_primeiro_saque)}
@@ -142,27 +141,27 @@ export default function MatchReport({ matchId }: { matchId: string }) {
       <Section title="Winners e erros">
         <StrokeStats
           title="Winners"
-          total={stats.winners_total}
-          forehand={stats.winners_forehand}
-          backhand={stats.winners_backhand}
-          volley={stats.winners_voleio}
-          smash={stats.winners_smash}
+          total={stats.winners_total ?? 0}
+          forehand={stats.winners_forehand ?? 0}
+          backhand={stats.winners_backhand ?? 0}
+          volley={stats.winners_voleio ?? 0}
+          smash={stats.winners_smash ?? 0}
         />
         <StrokeStats
           title="Erros não forçados"
-          total={stats.erros_nao_forcados_total}
-          forehand={stats.erros_nao_forcados_forehand}
-          backhand={stats.erros_nao_forcados_backhand}
-          volley={stats.erros_nao_forcados_voleio}
-          smash={stats.erros_nao_forcados_smash}
+          total={stats.erros_nao_forcados_total ?? 0}
+          forehand={stats.erros_nao_forcados_forehand ?? 0}
+          backhand={stats.erros_nao_forcados_backhand ?? 0}
+          volley={stats.erros_nao_forcados_voleio ?? 0}
+          smash={stats.erros_nao_forcados_smash ?? 0}
         />
         <StrokeStats
           title="Erros forçados"
-          total={stats.erros_forcados_total}
-          forehand={stats.erros_forcados_forehand}
-          backhand={stats.erros_forcados_backhand}
-          volley={stats.erros_forcados_voleio}
-          smash={stats.erros_forcados_smash}
+          total={stats.erros_forcados_total ?? 0}
+          forehand={stats.erros_forcados_forehand ?? 0}
+          backhand={stats.erros_forcados_backhand ?? 0}
+          volley={stats.erros_forcados_voleio ?? 0}
+          smash={stats.erros_forcados_smash ?? 0}
         />
       </Section>
 
@@ -170,24 +169,24 @@ export default function MatchReport({ matchId }: { matchId: string }) {
         <StatGrid>
           <Stat
             label="Enfrentados"
-            value={stats.break_points_enfrentados}
+            value={stats.break_points_enfrentados ?? 0}
           />
           <Stat
             label="Convertidos pelo adversário"
-            value={stats.break_points_convertidos}
+            value={stats.break_points_convertidos ?? 0}
           />
-          <Stat label="A favor" value={stats.break_points_a_favor} />
+          <Stat label="A favor" value={stats.break_points_a_favor ?? 0} />
           <Stat
             label="Convertidos a favor"
-            value={stats.break_points_convertidos_a_favor}
+            value={stats.break_points_convertidos_a_favor ?? 0}
           />
         </StatGrid>
       </Section>
 
       <Section title="Pontos">
         <StatGrid>
-          <Stat label="Pontos jogados" value={stats.pontos_totais_jogados} />
-          <Stat label="Pontos ganhos" value={stats.pontos_totais_ganhos} />
+          <Stat label="Pontos jogados" value={stats.pontos_totais_jogados ?? 0} />
+          <Stat label="Pontos ganhos" value={stats.pontos_totais_ganhos ?? 0} />
           <Stat
             label="% de pontos ganhos"
             value={formatPercentOrUnavailable(stats.pct_pontos_ganhos)}

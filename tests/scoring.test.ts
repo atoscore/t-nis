@@ -9,7 +9,7 @@ import {
   setsToWin,
   type GameMode,
 } from '../src/services/scoring';
-import type { Side } from '../src/types/database';
+import type { Side } from '../src/types/domain';
 
 const P: Side = 'player';
 const O: Side = 'opponent';

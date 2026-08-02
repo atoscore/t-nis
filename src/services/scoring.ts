@@ -3,7 +3,7 @@
  * derivado da sequência de pontos; o estado persistido fica em matchService.
  */
 
-import type { Outcome, Side } from '../types/database';
+import type { Outcome, Side } from '../types/domain';
 
 export function opposite(side: Side): Side {
   return side === 'player' ? 'opponent' : 'player';

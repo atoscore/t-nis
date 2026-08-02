@@ -5,8 +5,10 @@ via cliente Supabase contra o schema existente):
 
 - `src/lib/supabaseClient.ts` — cliente único, configurado por `SUPABASE_URL` e
   `SUPABASE_ANON_KEY` (veja `.env.example`).
-- `src/types/database.ts` — tipos TypeScript do schema fixo (`matches`, `sets`,
-  `stat_events`).
+- `src/types/supabase.ts` — tipos gerados via `supabase gen types typescript`
+  a partir do schema real (fonte única de verdade para tabelas/views/funções).
+- `src/types/domain.ts` — literais de domínio que o banco não expõe como tipo
+  (colunas de texto livre como `matches.status`, `sets.winner`).
 - `src/services/scoring.ts` — regras puras de pontuação (sem I/O), cobertas por
   `tests/scoring.test.ts`.
 - `src/services/matchService.ts` — API da camada de aplicação.
@@ -127,8 +129,8 @@ Estatísticas agregadas não são calculadas aqui — permanecem na view
   (40-40 decisivo). Só existe em game comum; tiebreak e match tiebreak nunca
   são break point. `break_point_won` fica `true`/`false` quando o ponto era
   break point (convertido = quem recebia venceu) e `null` nos demais.
-- **Ids**: tipados como `string` (premissa de uuid). Se o schema real usar
-  `bigint`, ajuste os aliases em `src/types/database.ts`.
+- **Ids**: tipados como `string` (uuid), conforme gerado em
+  `src/types/supabase.ts` a partir do schema real.
 
 ## Atomicidade
 

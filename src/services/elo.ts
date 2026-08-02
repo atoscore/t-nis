@@ -5,7 +5,7 @@
  * matchService (applyGameCompletion / ensureOpenSet).
  */
 
-import type { Side } from '../types/database';
+import type { Side } from '../types/domain';
 
 const K_FACTOR = 32;
 

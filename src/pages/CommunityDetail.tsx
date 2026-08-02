@@ -6,12 +6,10 @@ import {
   getMyMembership,
   listPendingRequests,
   respondToJoinRequest,
+  type CommunityMemberRow,
+  type CommunityRankingRow,
+  type CommunityRow,
 } from '../services/communityService';
-import type {
-  CommunityMemberRow,
-  CommunityRankingRow,
-  CommunityRow,
-} from '../types/database';
 
 interface CommunityDetailProps {
   communityId: string;

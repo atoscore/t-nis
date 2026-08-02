@@ -8,7 +8,7 @@ import {
   type SetScore,
 } from '../services/matchService';
 import { isBreakPoint, type GameMode } from '../services/scoring';
-import type { Outcome, Side, Stroke } from '../types/database';
+import type { Outcome, Side, Stroke } from '../types/domain';
 
 const STROKE_LABELS: Record<Stroke, string> = {
   saque: 'Saque',

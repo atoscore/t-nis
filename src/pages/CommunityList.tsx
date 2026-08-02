@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { listMyCommunities } from '../services/communityService';
-import type { CommunityRow } from '../types/database';
+import { listMyCommunities, type CommunityRow } from '../services/communityService';
 
 interface CommunityListProps {
   onCreateNew: () => void;

@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
-import type { PlayerEditorRow } from '../types/database';
+import type { Tables } from '../types/supabase';
+
+export type PlayerEditorRow = Tables<'player_editors'>;
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
