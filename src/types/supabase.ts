@@ -543,6 +543,18 @@ export type Database = {
         Args: { p_author_id: string; p_viewer_id: string }
         Returns: boolean
       }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      ranking_for_accounts: {
+        Args: { p_account_ids: string[] }
+        Returns: {
+          account_id: string
+          derrotas: number
+          display_name: string
+          partidas: number
+          pct_vitorias: number
+          vitorias: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
