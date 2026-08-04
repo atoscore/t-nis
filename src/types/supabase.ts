@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      account_badges: {
+        Row: {
+          account_id: string
+          badge_code: string
+          earned_at: string
+          id: string
+          match_id: string
+        }
+        Insert: {
+          account_id: string
+          badge_code: string
+          earned_at?: string
+          id?: string
+          match_id: string
+        }
+        Update: {
+          account_id?: string
+          badge_code?: string
+          earned_at?: string
+          id?: string
+          match_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_badges_badge_code_fkey"
+            columns: ["badge_code"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "account_badges_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      badges: {
+        Row: {
+          code: string
+          description: string
+          name: string
+        }
+        Insert: {
+          code: string
+          description: string
+          name: string
+        }
+        Update: {
+          code?: string
+          description?: string
+          name?: string
+        }
+        Relationships: []
+      }
       communities: {
         Row: {
           created_at: string
@@ -538,6 +597,11 @@ export type Database = {
       is_player_owner: {
         Args: { p_player_id: string; p_uid: string }
         Returns: boolean
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      match_side_account_id: {
+        Args: { p_match_id: string; p_side: string }
+        Returns: string
       }
       post_visible_to: {
         Args: { p_author_id: string; p_viewer_id: string }
