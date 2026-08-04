@@ -73,6 +73,52 @@ export type Database = {
         }
         Relationships: []
       }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      brecho_listings: {
+        Row: {
+          category: string
+          condition: string
+          created_at: string
+          description: string | null
+          id: string
+          image_paths: string[]
+          location: string | null
+          price: number | null
+          seller_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          condition: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_paths?: string[]
+          location?: string | null
+          price?: number | null
+          seller_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_paths?: string[]
+          location?: string | null
+          price?: number | null
+          seller_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communities: {
         Row: {
           created_at: string
