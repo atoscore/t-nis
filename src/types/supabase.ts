@@ -290,6 +290,68 @@ export type Database = {
           },
         ]
       }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      matchmaking_notifications: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          requested_by: string
+          status: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          requested_by: string
+          status?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          requested_by?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      matchmaking_profiles: {
+        Row: {
+          account_id: string
+          available_days: number[]
+          available_end_time: string | null
+          available_start_time: string | null
+          is_active: boolean
+          location: unknown
+          search_radius_km: number
+          skill_level: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          available_days?: number[]
+          available_end_time?: string | null
+          available_start_time?: string | null
+          is_active?: boolean
+          location: unknown
+          search_radius_km?: number
+          skill_level: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          available_days?: number[]
+          available_end_time?: string | null
+          available_start_time?: string | null
+          is_active?: boolean
+          location?: unknown
+          search_radius_km?: number
+          skill_level?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       player_editors: {
         Row: {
           created_at: string
@@ -604,6 +666,16 @@ export type Database = {
     }
     Functions: {
       classe_from_elo: { Args: { elo: number }; Returns: string }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      find_nearby_matches: {
+        Args: { p_max_results?: number }
+        Returns: {
+          account_id: string
+          display_name: string
+          distance_km: number
+          skill_level: string
+        }[]
+      }
       follow_status_allowed: {
         Args: { p_followee_id: string; p_status: string }
         Returns: boolean
@@ -664,6 +736,17 @@ export type Database = {
           pct_vitorias: number
           vitorias: number
         }[]
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      request_match: {
+        Args: { p_target_account_id: string }
+        Returns: {
+          account_id: string
+          created_at: string
+          id: string
+          requested_by: string
+          status: string
+        }
       }
     }
     Enums: {
