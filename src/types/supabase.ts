@@ -14,7 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       account_badges: {
         Row: {
           account_id: string
@@ -49,12 +48,18 @@ export type Database = {
             foreignKeyName: "account_badges_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
+            referencedRelation: "match_stats_summary"
+            referencedColumns: ["match_id"]
+          },
+          {
+            foreignKeyName: "account_badges_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
             referencedRelation: "matches"
             referencedColumns: ["id"]
           },
         ]
       }
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       badges: {
         Row: {
           code: string
@@ -73,7 +78,6 @@ export type Database = {
         }
         Relationships: []
       }
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       brecho_listings: {
         Row: {
           category: string
@@ -290,7 +294,6 @@ export type Database = {
           },
         ]
       }
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       matchmaking_notifications: {
         Row: {
           account_id: string
@@ -315,7 +318,6 @@ export type Database = {
         }
         Relationships: []
       }
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       matchmaking_profiles: {
         Row: {
           account_id: string
@@ -571,6 +573,30 @@ export type Database = {
           },
         ]
       }
+      spatial_ref_sys: {
+        Row: {
+          auth_name: string | null
+          auth_srid: number | null
+          proj4text: string | null
+          srid: number
+          srtext: string | null
+        }
+        Insert: {
+          auth_name?: string | null
+          auth_srid?: number | null
+          proj4text?: string | null
+          srid: number
+          srtext?: string | null
+        }
+        Update: {
+          auth_name?: string | null
+          auth_srid?: number | null
+          proj4text?: string | null
+          srid?: number
+          srtext?: string | null
+        }
+        Relationships: []
+      }
       stat_events: {
         Row: {
           break_point_won: boolean | null
@@ -581,7 +607,6 @@ export type Database = {
           match_id: string
           outcome: string
           point_number: number
-          // TEMP: gen manual, confirmar com supabase gen types (20260804000001_add_serve_number.sql)
           serve_number: number | null
           server: string
           set_number: number
@@ -596,7 +621,6 @@ export type Database = {
           match_id: string
           outcome: string
           point_number: number
-          // TEMP: gen manual, confirmar com supabase gen types (20260804000001_add_serve_number.sql)
           serve_number?: number | null
           server: string
           set_number: number
@@ -611,7 +635,6 @@ export type Database = {
           match_id?: string
           outcome?: string
           point_number?: number
-          // TEMP: gen manual, confirmar com supabase gen types (20260804000001_add_serve_number.sql)
           serve_number?: number | null
           server?: string
           set_number?: number
@@ -636,6 +659,48 @@ export type Database = {
       }
     }
     Views: {
+      geography_columns: {
+        Row: {
+          coord_dimension: number | null
+          f_geography_column: unknown
+          f_table_catalog: unknown
+          f_table_name: unknown
+          f_table_schema: unknown
+          srid: number | null
+          type: string | null
+        }
+        Relationships: []
+      }
+      geometry_columns: {
+        Row: {
+          coord_dimension: number | null
+          f_geometry_column: unknown
+          f_table_catalog: string | null
+          f_table_name: unknown
+          f_table_schema: unknown
+          srid: number | null
+          type: string | null
+        }
+        Insert: {
+          coord_dimension?: number | null
+          f_geometry_column?: unknown
+          f_table_catalog?: string | null
+          f_table_name?: unknown
+          f_table_schema?: unknown
+          srid?: number | null
+          type?: string | null
+        }
+        Update: {
+          coord_dimension?: number | null
+          f_geometry_column?: unknown
+          f_table_catalog?: string | null
+          f_table_name?: unknown
+          f_table_schema?: unknown
+          srid?: number | null
+          type?: string | null
+        }
+        Relationships: []
+      }
       match_stats_summary: {
         Row: {
           aces: number | null
@@ -659,7 +724,6 @@ export type Database = {
           pct_pontos_ganhos_primeiro_saque: number | null
           pct_pontos_ganhos_segundo_saque: number | null
           pct_primeiro_saque: number | null
-          // TEMP: gen manual, confirmar com supabase gen types (20260804000003_update_match_stats_summary_serve_pct.sql)
           pct_segundo_saque: number | null
           pontos_totais_ganhos: number | null
           pontos_totais_jogados: number | null
@@ -674,7 +738,6 @@ export type Database = {
     }
     Functions: {
       classe_from_elo: { Args: { elo: number }; Returns: string }
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       find_nearby_matches: {
         Args: { p_max_results?: number }
         Returns: {
@@ -708,16 +771,15 @@ export type Database = {
           vencedor_player_id: string
         }[]
       }
-      // TEMP: gen manual, confirmar com supabase gen types (20260804000002_add_player_radar_stats.sql)
       get_player_radar_stats: {
         Args: { p_player_id: string }
         Returns: {
-          backhand: number | null
-          devolucao: number | null
-          fisico: number | null
-          forehand: number | null
-          mental: number | null
-          saque: number | null
+          backhand: number
+          devolucao: number
+          fisico: number
+          forehand: number
+          mental: number
+          saque: number
         }[]
       }
       is_accepted_community_member: {
@@ -736,7 +798,6 @@ export type Database = {
         Args: { p_player_id: string; p_uid: string }
         Returns: boolean
       }
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       match_side_account_id: {
         Args: { p_match_id: string; p_side: string }
         Returns: string
@@ -745,7 +806,6 @@ export type Database = {
         Args: { p_author_id: string; p_viewer_id: string }
         Returns: boolean
       }
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       ranking_for_accounts: {
         Args: { p_account_ids: string[] }
         Returns: {
@@ -757,7 +817,6 @@ export type Database = {
           vitorias: number
         }[]
       }
-      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
       request_match: {
         Args: { p_target_account_id: string }
         Returns: {
@@ -773,7 +832,15 @@ export type Database = {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      geometry_dump: {
+        path: number[] | null
+        geom: unknown
+      }
+      valid_detail: {
+        valid: boolean | null
+        reason: string | null
+        location: unknown
+      }
     }
   }
 }
