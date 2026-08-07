@@ -14,6 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      account_badges: {
+        Row: {
+          account_id: string
+          badge_code: string
+          earned_at: string
+          id: string
+          match_id: string
+        }
+        Insert: {
+          account_id: string
+          badge_code: string
+          earned_at?: string
+          id?: string
+          match_id: string
+        }
+        Update: {
+          account_id?: string
+          badge_code?: string
+          earned_at?: string
+          id?: string
+          match_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_badges_badge_code_fkey"
+            columns: ["badge_code"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "account_badges_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      badges: {
+        Row: {
+          code: string
+          description: string
+          name: string
+        }
+        Insert: {
+          code: string
+          description: string
+          name: string
+        }
+        Update: {
+          code?: string
+          description?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      brecho_listings: {
+        Row: {
+          category: string
+          condition: string
+          created_at: string
+          description: string | null
+          id: string
+          image_paths: string[]
+          location: string | null
+          price: number | null
+          seller_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          condition: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_paths?: string[]
+          location?: string | null
+          price?: number | null
+          seller_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_paths?: string[]
+          location?: string | null
+          price?: number | null
+          seller_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communities: {
         Row: {
           created_at: string
@@ -184,6 +289,68 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      matchmaking_notifications: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          requested_by: string
+          status: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          requested_by: string
+          status?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          requested_by?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      matchmaking_profiles: {
+        Row: {
+          account_id: string
+          available_days: number[]
+          available_end_time: string | null
+          available_start_time: string | null
+          is_active: boolean
+          location: unknown
+          search_radius_km: number
+          skill_level: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          available_days?: number[]
+          available_end_time?: string | null
+          available_start_time?: string | null
+          is_active?: boolean
+          location: unknown
+          search_radius_km?: number
+          skill_level: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          available_days?: number[]
+          available_end_time?: string | null
+          available_start_time?: string | null
+          is_active?: boolean
+          location?: unknown
+          search_radius_km?: number
+          skill_level?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       player_editors: {
         Row: {
@@ -507,6 +674,16 @@ export type Database = {
     }
     Functions: {
       classe_from_elo: { Args: { elo: number }; Returns: string }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      find_nearby_matches: {
+        Args: { p_max_results?: number }
+        Returns: {
+          account_id: string
+          display_name: string
+          distance_km: number
+          skill_level: string
+        }[]
+      }
       follow_status_allowed: {
         Args: { p_followee_id: string; p_status: string }
         Returns: boolean
@@ -559,9 +736,37 @@ export type Database = {
         Args: { p_player_id: string; p_uid: string }
         Returns: boolean
       }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      match_side_account_id: {
+        Args: { p_match_id: string; p_side: string }
+        Returns: string
+      }
       post_visible_to: {
         Args: { p_author_id: string; p_viewer_id: string }
         Returns: boolean
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      ranking_for_accounts: {
+        Args: { p_account_ids: string[] }
+        Returns: {
+          account_id: string
+          derrotas: number
+          display_name: string
+          partidas: number
+          pct_vitorias: number
+          vitorias: number
+        }[]
+      }
+      // TEMP: gen manual, confirmar com supabase gen types na linha alterada
+      request_match: {
+        Args: { p_target_account_id: string }
+        Returns: {
+          account_id: string
+          created_at: string
+          id: string
+          requested_by: string
+          status: string
+        }
       }
     }
     Enums: {
