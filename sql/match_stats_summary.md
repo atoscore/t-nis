@@ -71,30 +71,29 @@ contadores são `0` e suas proporções são `NULL`.
 
   A view não reinterpreta o significado de `break_point_won`: assume que `true`
   já significa "convertido" segundo a origem dos dados.
-- `pct_primeiro_saque` é uma **aproximação** no intervalo de `0` a `1`. O
-  denominador é o número de pontos distintos com `server = 'player'`. O
-  numerador contém os pontos que possuem pelo menos um evento com `stroke =
-  'saque'` e nenhum evento com `outcome = 'dupla_falta'`.
+- `pct_primeiro_saque` e `pct_segundo_saque` usam a coluna `serve_number` de
+  `stat_events` (`1` ou `2`, preenchida no evento com `stroke = 'saque'` —
+  ver `supabase/migrations/20260804000001_add_serve_number.sql`). O
+  denominador de ambas é o número de pontos distintos com `server =
+  'player'` cujo evento de saque tem `serve_number` preenchido.
+  `pct_primeiro_saque` conta os pontos com `serve_number = 1`;
+  `pct_segundo_saque`, os pontos com `serve_number = 2`. Pontos sem
+  `serve_number` (eventos gravados antes dessa coluna existir) ficam fora do
+  numerador e do denominador das duas.
 - A ordem dos eventos não é inferida por `id`. O schema não declara que `id`
-  seja cronológico, portanto a expressão "antes do erro" é interpretada no
-  nível do ponto inteiro: qualquer dupla falta no ponto o exclui do numerador.
+  seja cronológico.
 
 ## Pendência de dados
 
-O schema informado não registra qual tentativa de saque produziu um evento e
-também não registra uma falta simples de primeiro saque. Por isso, um ponto sem
-dupla falta pode ter sido disputado após um primeiro saque válido **ou** após um
-primeiro saque errado seguido de segundo saque válido.
+`serve_number` identifica a tentativa de saque (primeira ou segunda) a
+partir de `supabase/migrations/20260804000001_add_serve_number.sql`, mas só
+para eventos gravados depois dessa migration. Partidas antigas não têm esse
+dado e não entram no cálculo de `pct_primeiro_saque`/`pct_segundo_saque`.
 
-Consequentemente, não há informação suficiente para calcular corretamente:
-
-- `pct_pontos_ganhos_primeiro_saque`;
-- `pct_pontos_ganhos_segundo_saque`.
-
-Essas duas colunas retornam `NULL` de forma intencional. O dado ausente é a
-identificação da tentativa de saque (primeira ou segunda), ou informação
-equivalente. Nenhuma tabela ou coluna é criada ou alterada por esta
-implementação.
+Calcular `pct_pontos_ganhos_primeiro_saque` e `pct_pontos_ganhos_segundo_saque`
+a partir de `serve_number` é possível, mas ficou fora do escopo da migration
+que introduziu essa coluna. Por isso essas duas colunas continuam retornando
+`NULL` de forma intencional.
 
 ## Tipo e escala dos resultados
 

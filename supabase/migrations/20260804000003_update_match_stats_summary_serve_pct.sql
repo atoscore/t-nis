@@ -1,17 +1,25 @@
 /*
- * Resumo agregado de estatísticas por partida.
+ * Recalcula pct_primeiro_saque usando serve_number
+ * (20260804000001_add_serve_number.sql) em vez da aproximação anterior
+ * (stroke = 'saque' e sem dupla_falta), e adiciona pct_segundo_saque.
  *
- * Esta implementação é uma view, e não uma função, para:
- *   1. preservar automaticamente o tipo real de matches.id/match_id;
- *   2. permitir filtros normais, por exemplo:
- *        SELECT * FROM public.match_stats_summary WHERE match_id = ...;
- *   3. retornar também partidas que ainda não possuem stat_events.
+ * CREATE OR REPLACE VIEW não permite remover, renomear ou reordenar colunas
+ * existentes — só pode alterar a expressão de uma coluna já existente (caso
+ * de pct_primeiro_saque) e acrescentar colunas novas ao final da lista (caso
+ * de pct_segundo_saque). Por isso o restante da view é idêntico a
+ * sql/match_stats_summary.sql; apenas point_totals e as duas colunas de %
+ * de saque mudam.
  *
- * As proporções são retornadas no intervalo de 0 a 1.
- * Consulte match_stats_summary.md para as premissas e limitações.
+ * pct_primeiro_saque e pct_segundo_saque só contam pontos sacados pelo
+ * player cujo evento de saque tem serve_number preenchido. Partidas
+ * registradas antes desta coluna existir (ou eventos sem serve_number por
+ * qualquer motivo) ficam fora do denominador — devolver NULL nesse caso é
+ * mais correto do que reaproveitar a aproximação antiga, que não
+ * distinguia 1º e 2º saque.
  *
- * pct_primeiro_saque e pct_segundo_saque usam a coluna serve_number de
- * stat_events (supabase/migrations/20260804000001_add_serve_number.sql).
+ * pct_pontos_ganhos_primeiro_saque e pct_pontos_ganhos_segundo_saque
+ * continuam sempre NULL: calculá-las a partir de serve_number está fora do
+ * escopo desta migration.
  */
 CREATE OR REPLACE VIEW public.match_stats_summary AS
 WITH event_totals AS (
@@ -175,10 +183,9 @@ SELECT
     ) AS pct_primeiro_saque,
     /*
      * O schema não distingue a tentativa de saque para eventos gravados
-     * antes de serve_number existir. Calcular
-     * pct_pontos_ganhos_primeiro_saque/segundo_saque a partir de
-     * serve_number fica fora do escopo da migration que introduziu essa
-     * coluna (20260804000001_add_serve_number.sql).
+     * antes de serve_number existir (20260804000001_add_serve_number.sql).
+     * Calcular pct_pontos_ganhos_primeiro_saque/segundo_saque a partir de
+     * serve_number fica fora do escopo desta migration.
      */
     NULL::numeric AS pct_pontos_ganhos_primeiro_saque,
     NULL::numeric AS pct_pontos_ganhos_segundo_saque,

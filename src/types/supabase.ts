@@ -414,6 +414,8 @@ export type Database = {
           match_id: string
           outcome: string
           point_number: number
+          // TEMP: gen manual, confirmar com supabase gen types (20260804000001_add_serve_number.sql)
+          serve_number: number | null
           server: string
           set_number: number
           stroke: string | null
@@ -427,6 +429,8 @@ export type Database = {
           match_id: string
           outcome: string
           point_number: number
+          // TEMP: gen manual, confirmar com supabase gen types (20260804000001_add_serve_number.sql)
+          serve_number?: number | null
           server: string
           set_number: number
           stroke?: string | null
@@ -440,6 +444,8 @@ export type Database = {
           match_id?: string
           outcome?: string
           point_number?: number
+          // TEMP: gen manual, confirmar com supabase gen types (20260804000001_add_serve_number.sql)
+          serve_number?: number | null
           server?: string
           set_number?: number
           stroke?: string | null
@@ -486,6 +492,8 @@ export type Database = {
           pct_pontos_ganhos_primeiro_saque: number | null
           pct_pontos_ganhos_segundo_saque: number | null
           pct_primeiro_saque: number | null
+          // TEMP: gen manual, confirmar com supabase gen types (20260804000003_update_match_stats_summary_serve_pct.sql)
+          pct_segundo_saque: number | null
           pontos_totais_ganhos: number | null
           pontos_totais_jogados: number | null
           winners_backhand: number | null
@@ -521,6 +529,18 @@ export type Database = {
           match_id: string
           placar: string
           vencedor_player_id: string
+        }[]
+      }
+      // TEMP: gen manual, confirmar com supabase gen types (20260804000002_add_player_radar_stats.sql)
+      get_player_radar_stats: {
+        Args: { p_player_id: string }
+        Returns: {
+          backhand: number | null
+          devolucao: number | null
+          fisico: number | null
+          forehand: number | null
+          mental: number | null
+          saque: number | null
         }[]
       }
       is_accepted_community_member: {
