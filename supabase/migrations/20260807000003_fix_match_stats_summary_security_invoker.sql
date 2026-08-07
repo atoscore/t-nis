@@ -1,0 +1,13 @@
+-- match_stats_summary (criada em 20260804000003_update_match_stats_summary_serve_pct.sql,
+-- e antes dela em versão anterior não rastreada) rodava sem
+-- security_invoker: por padrão uma view executa com o privilégio de quem
+-- a criou (postgres, superuser), não de quem consulta — isso faz a RLS de
+-- matches/stat_events por trás dela ser completamente ignorada.
+--
+-- Vazamento real confirmado empiricamente (não teórico): uma conta sem
+-- nenhuma relação com a partida de outra (não é owner_id, não é o player
+-- vinculado, não tem player_editors ativo) conseguia ler as estatísticas
+-- dessa partida via esta view. security_invoker = true faz a view herdar
+-- o papel de quem consulta, então a RLS de matches/stat_events volta a
+-- valer.
+alter view public.match_stats_summary set (security_invoker = true);
