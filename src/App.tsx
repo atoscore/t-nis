@@ -1,89 +1,144 @@
-import React, { useState } from 'react';
-import { Trophy, Activity, ShoppingBag, Brain, Home, User } from 'lucide-react';
-import Scorekeeper from './components/Scorekeeper';
-import TournamentBracket from './components/TournamentBracket';
-import Marketplace from './components/Marketplace';
-import AICoach from './components/AICoach';
-import Onboarding from './components/Onboarding';
-import Feed from './components/Feed';
-import Dashboard from './components/Dashboard';
+import { useEffect, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
+import { supabase } from './lib/supabaseClient';
+import CommunityDetail from './pages/CommunityDetail';
+import CommunityList from './pages/CommunityList';
+import InviteToCommunity from './pages/InviteToCommunity';
+import JoinCommunity from './pages/JoinCommunity';
+import LiveMatch from './pages/LiveMatch';
+import Login from './pages/Login';
+import NewCommunity from './pages/NewCommunity';
+import NewMatch from './pages/NewMatch';
+import SignUp from './pages/SignUp';
 
-type Tab = 'FEED' | 'SCORE' | 'COACH' | 'STORE' | 'PROFILE';
+type AuthScreen = 'login' | 'signup';
 
+type View =
+  | { name: 'matches' }
+  | { name: 'communities' }
+  | { name: 'community-new' }
+  | { name: 'community-join' }
+  | { name: 'community-detail'; communityId: string }
+  | { name: 'community-invite'; communityId: string };
+
+/*
+ * Gate de autenticação + navegação mínima por estado:
+ * sem sessão -> Login/SignUp; com sessão -> Partidas ou Comunidades.
+ * Se o app ganhar mais telas, promover para um router de verdade.
+ */
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>('FEED');
+  // undefined = ainda restaurando a sessão persistida (evita piscar o login).
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
+  const [authScreen, setAuthScreen] = useState<AuthScreen>('login');
+  const [view, setView] = useState<View>({ name: 'matches' });
+  const [matchId, setMatchId] = useState<string | null>(null);
 
-  if (!isAuthenticated) {
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (!newSession) {
+        // Logout: descarta a navegação para não reabrir telas de outra conta.
+        setMatchId(null);
+        setView({ name: 'matches' });
+        setAuthScreen('login');
+      }
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  if (session === undefined) {
     return (
-      <div className="min-h-screen bg-black text-zinc-100 font-sans flex justify-center items-center overflow-hidden touch-none selection:bg-white/20">
-        <div className="w-full h-[100dvh] max-w-md bg-black border-x border-white/5 relative shadow-2xl flex flex-col overflow-hidden">
-          <Onboarding onComplete={() => setIsAuthenticated(true)} />
-        </div>
-      </div>
+      <main className="page">
+        <p>Carregando…</p>
+      </main>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-black text-zinc-100 font-sans flex justify-center items-center overflow-hidden touch-none selection:bg-white/20">
-      {/* Mobile container constraint for web preview */}
-      <div className="w-full h-[100dvh] max-w-md bg-black border-x border-white/5 relative shadow-2xl flex flex-col overflow-hidden">
-        
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-hidden flex flex-col pb-[64px]">
-          {activeTab === 'FEED' && <Feed />}
-          {activeTab === 'SCORE' && <Scorekeeper />}
-          {activeTab === 'COACH' && <AICoach />}
-          {activeTab === 'STORE' && <Marketplace />}
-          {activeTab === 'PROFILE' && <Dashboard />}
-        </div>
+  if (!session) {
+    return authScreen === 'login' ? (
+      <Login onGoToSignUp={() => setAuthScreen('signup')} />
+    ) : (
+      <SignUp onGoToLogin={() => setAuthScreen('login')} />
+    );
+  }
 
-        {/* Bottom Navigation */}
-        <div className="absolute bottom-0 w-full h-[64px] bg-black/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-2 pb-safe z-50">
-          <NavItem 
-            active={activeTab === 'FEED'} 
-            onClick={() => setActiveTab('FEED')}
-            icon={<Home size={20} />}
-            label="Início"
-          />
-          <NavItem 
-            active={activeTab === 'SCORE'} 
-            onClick={() => setActiveTab('SCORE')}
-            icon={<Activity size={20} />}
-            label="Score"
-          />
-          <NavItem 
-            active={activeTab === 'COACH'} 
-            onClick={() => setActiveTab('COACH')}
-            icon={<Brain size={20} />}
-            label="Coach"
-          />
-          <NavItem 
-            active={activeTab === 'STORE'} 
-            onClick={() => setActiveTab('STORE')}
-            icon={<ShoppingBag size={20} />}
-            label="Loja"
-          />
-          <NavItem 
-            active={activeTab === 'PROFILE'} 
-            onClick={() => setActiveTab('PROFILE')}
-            icon={<User size={20} />}
-            label="Perfil"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
+  const inCommunities = view.name !== 'matches';
 
-function NavItem({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) {
   return (
-    <button 
-      onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-1 w-[60px] h-full transition-colors ${active ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-    >
-      {icon}
-      <span className="text-[10px] font-medium tracking-wide">{label}</span>
-    </button>
+    <>
+      <header className="app-bar">
+        <span className="app-title">App Tênis</span>
+        <nav className="app-nav">
+          <button
+            type="button"
+            className={inCommunities ? 'nav-link' : 'nav-link selected'}
+            onClick={() => setView({ name: 'matches' })}
+          >
+            Partidas
+          </button>
+          <button
+            type="button"
+            className={inCommunities ? 'nav-link selected' : 'nav-link'}
+            onClick={() => setView({ name: 'communities' })}
+          >
+            Comunidades
+          </button>
+        </nav>
+        <span className="app-user">{session.user.email}</span>
+        <button
+          type="button"
+          className="logout"
+          onClick={() => void supabase.auth.signOut()}
+        >
+          Sair
+        </button>
+      </header>
+
+      {view.name === 'matches' &&
+        (matchId === null ? (
+          <NewMatch onMatchStarted={setMatchId} />
+        ) : (
+          <LiveMatch matchId={matchId} onExit={() => setMatchId(null)} />
+        ))}
+
+      {view.name === 'communities' && (
+        <CommunityList
+          onCreateNew={() => setView({ name: 'community-new' })}
+          onSearch={() => setView({ name: 'community-join' })}
+          onOpen={(communityId) => setView({ name: 'community-detail', communityId })}
+        />
+      )}
+
+      {view.name === 'community-new' && (
+        <NewCommunity
+          onCreated={(communityId) => setView({ name: 'community-detail', communityId })}
+          onBack={() => setView({ name: 'communities' })}
+        />
+      )}
+
+      {view.name === 'community-join' && (
+        <JoinCommunity onBack={() => setView({ name: 'communities' })} />
+      )}
+
+      {view.name === 'community-detail' && (
+        <CommunityDetail
+          communityId={view.communityId}
+          onInvite={(communityId) => setView({ name: 'community-invite', communityId })}
+          onBack={() => setView({ name: 'communities' })}
+        />
+      )}
+
+      {view.name === 'community-invite' && (
+        <InviteToCommunity
+          communityId={view.communityId}
+          onBack={() => setView({ name: 'community-detail', communityId: view.communityId })}
+        />
+      )}
+    </>
   );
 }
