@@ -9,6 +9,7 @@ import LiveMatch from './pages/LiveMatch';
 import Login from './pages/Login';
 import NewCommunity from './pages/NewCommunity';
 import NewMatch from './pages/NewMatch';
+import PlayerAccess from './pages/PlayerAccess';
 import SignUp from './pages/SignUp';
 
 type AuthScreen = 'login' | 'signup';
@@ -19,7 +20,8 @@ type View =
   | { name: 'community-new' }
   | { name: 'community-join' }
   | { name: 'community-detail'; communityId: string }
-  | { name: 'community-invite'; communityId: string };
+  | { name: 'community-invite'; communityId: string }
+  | { name: 'player-access'; playerId: string };
 
 /*
  * Gate de autenticação + navegação mínima por estado:
@@ -101,10 +103,15 @@ export default function App() {
 
       {view.name === 'matches' &&
         (matchId === null ? (
-          <NewMatch onMatchStarted={setMatchId} />
+          <NewMatch
+            onMatchStarted={setMatchId}
+            onManageAccess={(playerId) => setView({ name: 'player-access', playerId })}
+          />
         ) : (
           <LiveMatch matchId={matchId} onExit={() => setMatchId(null)} />
         ))}
+
+      {view.name === 'player-access' && <PlayerAccess playerId={view.playerId} />}
 
       {view.name === 'communities' && (
         <CommunityList
