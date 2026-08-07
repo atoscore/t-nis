@@ -1,14 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { startMatch } from '../services/matchService';
-import { createPlayer, listPlayers, type PlayerRow } from '../services/playerService';
+import { createGuestPlayer, listPlayers, type PlayerRow } from '../services/playerService';
 
 const NEW_PLAYER = '__new__';
 
 interface NewMatchProps {
   onMatchStarted: (matchId: string) => void;
+  onManageAccess?: (playerId: string) => void;
 }
 
-export default function NewMatch({ onMatchStarted }: NewMatchProps) {
+export default function NewMatch({ onMatchStarted, onManageAccess }: NewMatchProps) {
   const [players, setPlayers] = useState<PlayerRow[]>([]);
   const [playerId, setPlayerId] = useState<string>(NEW_PLAYER);
   const [newPlayerName, setNewPlayerName] = useState('');
@@ -37,7 +38,7 @@ export default function NewMatch({ onMatchStarted }: NewMatchProps) {
     setError(null);
     try {
       const resolvedPlayerId =
-        playerId === NEW_PLAYER ? (await createPlayer(newPlayerName)).id : playerId;
+        playerId === NEW_PLAYER ? (await createGuestPlayer(newPlayerName)).id : playerId;
 
       const { match } = await startMatch(
         resolvedPlayerId,
@@ -72,6 +73,16 @@ export default function NewMatch({ onMatchStarted }: NewMatchProps) {
             <option value={NEW_PLAYER}>+ Novo jogador…</option>
           </select>
         </label>
+
+        {playerId !== NEW_PLAYER && onManageAccess && (
+          <button
+            type="button"
+            className="link-button"
+            onClick={() => onManageAccess(playerId)}
+          >
+            Gerenciar acesso de anotadores
+          </button>
+        )}
 
         {playerId === NEW_PLAYER && (
           <label>
