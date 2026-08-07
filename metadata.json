@@ -1,6 +1,0 @@
-{
-  "name": "TENNIS CORE",
-  "description": "A comprehensive tennis tracking and social application.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
