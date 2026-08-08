@@ -1,7 +1,9 @@
 import { supabase } from '../lib/supabaseClient';
-import type { Tables } from '../types/supabase';
+import type { Database, Tables } from '../types/supabase';
 
 export type PlayerRow = Tables<'players'>;
+export type AnalyzablePlayer =
+  Database['public']['Functions']['get_analyzable_players']['Returns'][number];
 
 export async function listPlayers(): Promise<PlayerRow[]> {
   const { data, error } = await supabase
@@ -10,6 +12,19 @@ export async function listPlayers(): Promise<PlayerRow[]> {
     .order('name', { ascending: true });
   if (error) {
     throw new Error(`Falha ao carregar jogadores: ${error.message}`);
+  }
+  return data;
+}
+
+// A RPC já trata p_search vazio (devolve os primeiros 50 por nome) — quem
+// decide o que é "sem termo" é o backend, não este client, então sempre
+// chamamos a RPC (sem o early-return de searchProfiles/searchCommunities).
+export async function searchAnalyzablePlayers(query: string): Promise<AnalyzablePlayer[]> {
+  const { data, error } = await supabase.rpc('get_analyzable_players', {
+    p_search: query.trim(),
+  });
+  if (error) {
+    throw new Error(`Falha ao buscar jogadores: ${error.message}`);
   }
   return data;
 }
