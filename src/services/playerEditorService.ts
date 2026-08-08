@@ -95,6 +95,96 @@ export async function revokeAccess(
   return data;
 }
 
+// Pedido espontâneo de acesso: entra como 'pending' até o dono do jogador
+// responder (respondToAccessRequest). Mesmo padrão de
+// communityService.requestToJoin.
+export async function requestAccess(playerId: string): Promise<PlayerEditorRow> {
+  const normalizedPlayerId = requireUuid(
+    playerId,
+    'O identificador do jogador é inválido.'
+  );
+
+  const { data: auth, error: authError } = await supabase.auth.getUser();
+  if (authError || !auth.user) {
+    throw new Error(
+      'Usuário não autenticado: faça login antes de pedir acesso.'
+    );
+  }
+
+  const { data, error } = await supabase
+    .from('player_editors')
+    .insert({
+      player_id: normalizedPlayerId,
+      editor_id: auth.user.id,
+      granted_by: auth.user.id,
+      status: 'pending',
+    })
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error(
+        'Você já tem um pedido ou acesso registrado para esse jogador.'
+      );
+    }
+    throw new Error(`Falha ao pedir acesso ao jogador: ${error.message}`);
+  }
+
+  return data;
+}
+
+// Pedidos espontâneos aguardando resposta do dono. A policy
+// player_editors_select_involved já garante que só o dono ou o próprio
+// solicitante veem a linha — sem filtro client-side.
+export async function listPendingRequests(
+  playerId: string
+): Promise<PlayerEditorRow[]> {
+  const normalizedPlayerId = requireUuid(
+    playerId,
+    'O identificador do jogador é inválido.'
+  );
+
+  const { data, error } = await supabase
+    .from('player_editors')
+    .select('*')
+    .eq('player_id', normalizedPlayerId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    throw new Error(`Falha ao carregar os pedidos pendentes: ${error.message}`);
+  }
+
+  return data;
+}
+
+// player_editors_update_revoke_by_player_owner não restringe o valor de
+// destino do status — dono aceita (-> 'active') ou rejeita (-> 'revoked')
+// sem precisar de policy nova.
+export async function respondToAccessRequest(
+  playerEditorId: string,
+  accept: boolean
+): Promise<PlayerEditorRow> {
+  const normalizedGrantId = requireUuid(
+    playerEditorId,
+    'O identificador do pedido é inválido.'
+  );
+
+  const { data, error } = await supabase
+    .from('player_editors')
+    .update({ status: accept ? 'active' : 'revoked' })
+    .eq('id', normalizedGrantId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Falha ao responder o pedido: ${error.message}`);
+  }
+
+  return data;
+}
+
 function requireUuid(value: string, message: string): string {
   const normalized = value.trim();
   if (!UUID_PATTERN.test(normalized)) {
