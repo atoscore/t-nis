@@ -33,11 +33,11 @@ Deno.test('anthropicAdapter.generate: monta a chamada certa e extrai o texto', a
   try {
     const result = await anthropicAdapter.generate('prompt de teste');
     assertEquals(result.text, 'análise gerada');
-    assertEquals(result.model, 'claude-haiku-4-5');
+    assertEquals(result.model, 'claude-haiku-4-5-20251001');
     assertEquals(capturedUrl, 'https://api.anthropic.com/v1/messages');
     assertEquals(capturedHeaders['x-api-key'], 'test-anthropic-key');
     assertEquals(capturedHeaders['anthropic-version'], '2023-06-01');
-    assertEquals(capturedBody.model, 'claude-haiku-4-5');
+    assertEquals(capturedBody.model, 'claude-haiku-4-5-20251001');
   } finally {
     restore();
     Deno.env.delete('ANTHROPIC_API_KEY');

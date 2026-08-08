@@ -20,7 +20,7 @@ function requireEnv(name: string): string {
 export const anthropicAdapter: LlmAdapter = {
   async generate(prompt) {
     const apiKey = requireEnv('ANTHROPIC_API_KEY');
-    const model = Deno.env.get('ANTHROPIC_MODEL') ?? 'claude-haiku-4-5';
+    const model = Deno.env.get('ANTHROPIC_MODEL') ?? 'claude-haiku-4-5-20251001';
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
